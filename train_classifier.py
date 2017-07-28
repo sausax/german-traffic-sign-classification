@@ -1,9 +1,3 @@
-
-# coding: utf-8
-
-# In[1]:
-
-
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,15 +8,9 @@ from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 
+from helper import preprocess
 
 np.random.seed(42)
-
-
-# ## Load Data
-
-# In[2]:
-
-
 
 
 training_file = 'data/train.p'
@@ -42,8 +30,6 @@ X_test, y_test = test['features'], test['labels']
 
 
 # ## Summary of dataset
-
-# In[3]:
 
 # Number of training example
 n_train = X_train.shape[0]
@@ -66,68 +52,14 @@ print("Number of testing examples =", n_test)
 print("Image data shape =", image_shape)
 print("Number of classes =", n_classes)
 
-
-# ## Image of each traffic sign
-
-# In[4]:
-
-label_indx_map = {}
-
-for idx, label in enumerate(y_train):
-    if label not in label_indx_map:
-        label_indx_map[label] = idx
-        
-### Printing example of each kind
-import pandas as pd
-
-signs = pd.read_csv("data/signnames.csv")
-def get_sign_name(class_id):
-    return signs[signs['ClassId'] == class_id]['SignName'].tolist()[0]
-
-plt.figure(figsize=(20,30))
-for idx, key in enumerate(label_indx_map):
-    sign_name = get_sign_name(key)
-    plt.subplot(15, 3, idx+1)
-    plt.imshow(X_train[label_indx_map[key]])
-    plt.title(sign_name)
-    plt.axis('off')
-plt.tight_layout(pad=0.2, w_pad=0.1, h_pad=1.0)
-
-
-# ## Preprocess images
-
-# In[5]:
-
-def convert_to_gray(X):
-    wt_arr = [0.299, 0.587, 0.114]
-    X = np.einsum("ijkl,l -> ijk", X, wt_arr)
-    X = X[:, :, :, np.newaxis]
-    return X
-
-def normalize(X):
-    X = X.astype(int)
-    X = (X-128)/128
-    return X
-
-def preprocess(X):
-    X = convert_to_gray(X)
-    X = normalize(X)
-    return X
-
 X_train = preprocess(X_train)
 X_valid = preprocess(X_valid)
 X_test = preprocess(X_test)
 
 
-# In[6]:
-
 print("X_train shape: ", X_train.shape)
 print("y_train shape: ", y_train.shape)
 
-
-# ## Model parameters
-
-# In[7]:
 
 batch_size = 128
 num_classes = 43
@@ -135,17 +67,14 @@ epochs = 20
 input_shape = (32, 32, 1)
 
 
-# In[8]:
-
+# One hot encoding labels
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_valid = keras.utils.to_categorical(y_valid, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 
 
-# ## LeNet Model
-
-# In[9]:
-
+# Model with 3 convolutional layers followed by 2 fully 
+# connected layer
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(3, 3),
                  activation='relu',
@@ -167,9 +96,7 @@ model.compile(loss=keras.losses.categorical_crossentropy,
               metrics=['accuracy'])
 
 
-# ## Train Classifier
-
-# In[10]:
+## Train Classifier
 
 model.fit(X_train, y_train,
           batch_size=batch_size,
@@ -177,8 +104,6 @@ model.fit(X_train, y_train,
           verbose=1,
           validation_data=(X_valid, y_valid))
 
-
-# In[ ]:
 
 score = model.evaluate(X_test, y_test, verbose=0)
 print('Test loss:', score[0])
