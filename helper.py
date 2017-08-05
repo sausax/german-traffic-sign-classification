@@ -1,11 +1,8 @@
 import numpy as np
 import pandas as pd
 
-def convert_to_gray(X):
-    wt_arr = [0.299, 0.587, 0.114]
-    X = np.einsum("ijkl,l -> ijk", X, wt_arr)
-    X = X[:, :, :, np.newaxis]
-    return X
+def convert_to_gray(img):
+    return np.dot(img[...,:3], [0.299, 0.587, 0.114])
 
 def normalize(X):
     X = X.astype(int)
@@ -15,6 +12,7 @@ def normalize(X):
 def preprocess(X):
     X = convert_to_gray(X)
     X = normalize(X)
+    X = np.expand_dims(X, axis=3)
     return X
 
 signs = pd.read_csv("data/signnames.csv")
