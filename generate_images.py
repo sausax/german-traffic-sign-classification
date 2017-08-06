@@ -8,5 +8,5 @@ img_arr = pickle.load(f)
 for idx, img in enumerate(img_arr['features']):
 	#print(img)
 	plt.imshow(img)
-	plt.savefig('imgs/'+str(idx)+'.jpg')
+	plt.savefig('imgs/'+str(idx)+'.png')
 
